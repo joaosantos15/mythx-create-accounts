@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+
+const commandLineArgs = require('command-line-args');
+const commandLineUsage = require('command-line-usage');
+const fetch = require('isomorphic-fetch');
+const uuid = require('uuid/v4');
+
+/* Parcing of command line arguments. */
+
+const optionDefinitions = [{
+  name: 'user-id',
+  alias: 'u',
+  type: String,
+  description: 'Your MythX user ID, if you prefer to authenticate by user ID.',
+}, {
+  name: 'user-eth-address',
+  alias: 'e',
+  type: String,
+  description: 'Your Eth address, if you prefer to authenticate by Eth address.',
+}, {
+  name: 'password',
+  alias: 'p',
+  type: String,
+  description: 'Your MythX password.',
+}, {
+  name: 'roles',
+  alias: 'r',
+  multiple: true,
+  type: String,
+  description: 'Whitespace-separated list of user roles set on the created accounts.',
+}, {
+  name: 'number',
+  alias: 'n',
+  type: Number,
+  defaultValue: 1,
+  description: 'Optional. The number of user accounts to create. Defaults to 1.',
+}, {
+  name: 'output',
+  alias: 'o',
+  type: String,
+  defaultValue: 'accounts.txt',
+  description: 'Optional. Output file with IDs and passwords for created accounts. Defaults to `accounts.txt` file in the current folder.',
+}, {
+  name: 'api',
+  alias: 'a',
+  type: String,
+  defaultValue: 'https://api.mythx.io/v1',
+  description: 'Optional. Base API URL. Defaults to {underline https://api.mythx.io/v1} (production API)',
+}, {
+  name: 'label',
+  type: String,
+  description: 'Optional. `label` to set on each created account.',
+}, {
+  name: 'private-label',
+  type: String,
+  description: 'Optional. `privateLabel` to set on each created account.',
+}, {
+  name: 'help',
+  alias: 'h',
+  type: Boolean,
+  description: 'Prints usage guide.',
+}];
+
+const options = commandLineArgs(optionDefinitions);
+
+/* Output of usage info. */
+
+if (options.help) {
+  const usage = commandLineUsage([{
+    header: 'mythx-create-accounts',
+    content: [
+      'MythX script for batch creation of user accounts.',
+      'For additional details on arguments see {underline https://api.mythx.io/v1/openapi#operation/registerUser}',
+    ],
+  }, {
+    header: 'Options',
+    optionList: optionDefinitions,
+  }]);
+  console.log(usage);
+  process.exit(0);
+}
+
+/**
+ * Extracts response from `fetch()` result, or handles error and exits
+ * the script.
+ * @param {Object} res Fetch result.
+ * @param {Promise} Resolves To reponse payload.
+ */
+async function getResult(res) {
+  const payload = await res.json();
+  if (res.ok) return payload;
+  throw new Error(payload.error);
+}
+
+async function main() {
+  /* API login. */
+  console.log('Base API URL:', options.api);
+  console.log('Attempting API login...');
+  let req = { password: options.password };
+  if (options['user-id']) req.userId = options['user-id'];
+  if (options['user-eth-address']) {
+    req.ethAddress = options['user-eth-address'];
+  }
+  let res = await fetch(`${options.api}/auth/login`, {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(req),
+  });
+  const { jwtTokens } = await getResult(res);
+
+  req = {};
+  if (options.roles) req.roles = options.roles;
+  if (options.label) req.roles = options.label;
+  if (options['private-label']) {
+    req.privateLabel = options['private-label'];
+  }
+
+  console.log('Creating user accounts...');
+  const accounts = [];
+  for (let i = 0; i < options.number; i += 1) {
+    /* eslint-disable no-await-in-loop */
+    req.password = `P${uuid()}`;
+    res = await fetch(`${options.api}/users`, {
+      method: 'post',
+      headers: {
+        Authorization: `Bearer ${jwtTokens.access}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req),
+    });
+    res = await getResult(res);
+    accounts.push({
+      id: res.id,
+      password: req.password,
+    });
+    /* eslint-enable no-await-in-loop */
+  }
+
+  const outputPath = path.resolve(process.cwd(), options.output);
+  console.log('Writing account credentials to:', outputPath);
+
+  let output = accounts
+    .map(({ id, password }) => `${id} > ${password}`).join('\n');
+  output = `UserID > Password\n${output}`;
+  fs.writeFileSync(outputPath, output);
+}
+
+main().then(() => console.log('Done!'));
