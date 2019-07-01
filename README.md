@@ -42,5 +42,5 @@ Here is the full list of supported options:
 | `--output`           | `-o`  | Optional. Name of the file to write credentials for created accounts. Defaults to `accounts.txt`. |
 | `--api`              | `-a`  | Optional. Base API URL. Defaults to `https://api.mythx.io/v1` (production API). |
 | `--label`            |       | Optional. `label` to assign to created accounts. |
-| `--privateLabel`     |       | Optional. `privateLabel` to assign to created accounts. |
+| `--private-label`    |       | Optional. `privateLabel` to assign to created accounts. |
 | `--help`             | `-h`  | Print usage information and exit. |     
