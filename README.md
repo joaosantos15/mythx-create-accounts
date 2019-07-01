@@ -31,6 +31,7 @@ $ mythx-create-accounts -e <YOUR_ETH_ADDRESS> -p <YOUR_MYTHX_PASSWORD> -r Profes
 ```
 
 Here is the full list of supported options:
+
 | Option               | Alias | Argument                                      |
 | -------------------- | ----- | --------------------------------------------- |
 | `--user-id`          | `-u`  | MythX user ID to authorize the operation. Either this, or `-e` option must be provided. |
