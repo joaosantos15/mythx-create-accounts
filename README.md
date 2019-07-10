@@ -27,7 +27,7 @@ in the current working directory.
 
 You can authenticate with Ethereum address and password, like so:
 ```bash
-$ mythx-create-accounts -e <YOUR_ETH_ADDRESS> -p <YOUR_MYTHX_PASSWORD> -r Professional -n 10
+$ mythx-create-accounts -e <YOUR_ETH_ADDRESS> -p <YOUR_MYTHX_PASSWORD> -r Professional --owner-partner-id <PARNTER_USER_ID> -n 10
 ```
 
 Here is the full list of supported options:
@@ -38,6 +38,7 @@ Here is the full list of supported options:
 | `--user-eth-address` | `-e`  | Ethereum address to authorize the operation. Either this, or `-u` option must be provided. |
 | `--password`         | `-p`  | MythX password of the user specified by `-e` or `-u` option. |
 | `--roles`            | `-r`  | Optional. Whitespace separated array of roles to assign to created users; e.g. `-r Professional`, or `-r Free trusted_user`. Defaults to no roles. |
+| `--owner-partner-id` |       | Optional. User ID of the partner responsible for the newly created accounts for billing purposes.
 | `--number`           | `-n`  | Optional. The number of accounts to create. Defaults to `1`. |
 | `--output`           | `-o`  | Optional. Name of the file to write credentials for created accounts. Defaults to `accounts.txt`. |
 | `--api`              | `-a`  | Optional. Base API URL. Defaults to `https://api.mythx.io/v1` (production API). |

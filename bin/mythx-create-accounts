@@ -32,6 +32,10 @@ const optionDefinitions = [{
   type: String,
   description: 'Whitespace-separated list of user roles set on the created accounts.',
 }, {
+  name: 'owner-partner-id',
+  type: String,
+  description: 'User ID of the partner responsible for the created account(s) for the billing purposes.',
+}, {
   name: 'number',
   alias: 'n',
   type: Number,
@@ -115,6 +119,9 @@ async function main() {
 
   req = {};
   if (options.roles) req.roles = options.roles;
+  if (options['owner-partner-id']) {
+    req.ownerPartnerId = options['owner-partner-id'];
+  }
   if (options.label) req.roles = options.label;
   if (options['private-label']) {
     req.privateLabel = options['private-label'];
