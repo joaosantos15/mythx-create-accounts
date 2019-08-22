@@ -122,7 +122,7 @@ async function main() {
   if (options['owner-partner-id']) {
     req.ownerPartnerId = options['owner-partner-id'];
   }
-  if (options.label) req.roles = options.label;
+  if (options.label) req.label = options.label;
   if (options['private-label']) {
     req.privateLabel = options['private-label'];
   }
